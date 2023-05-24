@@ -1,5 +1,5 @@
 # MaxxFan and Houghton air conditioner controller
-An ESP32-based controller to control MaxxFan and Houghton air conditioner using ESPHome and Home Assistant
+An ESP32-based controller to control MaxxFan and Houghton air conditioner (or any AC using IR remote) using ESPHome and Home Assistant
 
 ## MaxxFan Features
 
@@ -10,8 +10,8 @@ An ESP32-based controller to control MaxxFan and Houghton air conditioner using 
 - ‘Resynchronize’ feature in case HA gets out of sync with fan. If someone manually presses the MaxxFan control panel, HA won’t know about it and will be out of sync. Pressing the resync button will send an IR command to set the MaxxFan at a predetermined state; will also adjust UI and tracking logic in HA to same state.
 - Keeps track of uptime, firmware status, and allows for reset.
 
-## Hougton AC/heatpump features
-- Controls the Houghton using IR transmitter to send commands to set heat/cool mode, fan speed, and power on/off. Temperature setting explained below.
+## AC/heatpump features
+- Controls the the AC/heatpump using IR transmitter to send commands to set heat/cool mode, fan speed, and power on/off. Temperature setting explained below.  The IR codes embedded in my ESPHome code is specific to Houghton AC, but you can substitute with appropriate codes for your particular AC unit.
 - One of the downsides of most rooftop AC units is that the temperature sensor is located in the return air duct in the middle of the ceiling control panel. That is simply too close to the conditioned air output, especially since the air exiting the side and rear air vents immediately bounces off the wall and back toward the return air duct. So the built-in sensor gets inaccurate readings of actual room temperature, and the units tend to short-cycle. That definitely is the case with mine prior to this modification.
 - So rather than use the built-in thermostat and let the unit determine on-off state, my controller takes over the temperature monitoring and on/off logic. It sends an ON command at max temp when the actual room temp is outside of desired temp band, and an OFF command once target temp is achieved. It only needs to use two temperatures: max low is 60F and max high is 85F.
 
