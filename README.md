@@ -1,4 +1,4 @@
-# MaxxFan and Houghton air conditioner controller
+# MaxxFan and air conditioner controller
 An ESP32-based controller to control MaxxFan and Houghton air conditioner (or any AC using IR remote) using ESPHome and Home Assistant
 
 ## MaxxFan Features
