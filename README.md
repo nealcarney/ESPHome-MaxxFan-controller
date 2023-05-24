@@ -16,10 +16,13 @@ An ESP32-based controller to control MaxxFan and Houghton air conditioner using 
 - So rather than use the built-in thermostat and let the unit determine on-off state, my controller takes over the temperature monitoring and on/off logic. It sends an ON command at max temp when the actual room temp is outside of desired temp band, and an OFF command once target temp is achieved. It only needs to use two temperatures: max low is 60F and max high is 85F.
 
 ## Known issues
-The schematics and PCB are a prototype!!!  Please do not try to use as-is.
+The schematics and PCB are a prototype!!!  Please do not try to use as-is.  Later I will update with more info on what I had to modify to make v1.0 work, and what has changed with v1.1 which has not been tested.
 
 ## Links
 - [PCB design files](https://oshwlab.com/ncarney/maxxfan-controller)
 - [Youtube demo of functionality](https://youtu.be/xNdgwMG5jzs).
 - [Post on Ford Transit USA Forum with more info](https://www.fordtransitusaforum.com/threads/home-assistant-for-van-automation.90215/post-1245570)
 - [AHT21 housing on Thingiverse](https://www.thingiverse.com/thing:5200358)
+
+## Notes
+- The homeassistant folder contains a www folder.  This contains the dependencies needed for some of the Lovelace UI elements that I used.  If interested you can install in your own www folder and then add to the resources section of your dashboard management.
