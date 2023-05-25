@@ -1,5 +1,6 @@
 # MaxxFan and air conditioner controller
-An ESP32-based controller to control MaxxFan and Houghton air conditioner (or any AC using IR remote) using ESPHome and Home Assistant
+An ESP32-based controller to control MaxxFan and Houghton air conditioner (or any AC using IR remote) using ESPHome and Home Assistant.
+![download2](https://github.com/nealcarney/ESPHome-MaxxFan-controller/assets/131406498/6c176993-6056-4b33-92c8-b6360162dcb2)
 
 ## MaxxFan Features
 
@@ -20,7 +21,7 @@ The schematics and PCB are a prototype!!!  Please do not try to use as-is.  Late
 
 ## Links
 - [PCB design files](https://oshwlab.com/ncarney/maxxfan-controller)
-- [Youtube demo of functionality](https://youtu.be/xNdgwMG5jzs).
+- [Youtube demo of functionality](https://youtu.be/xNdgwMG5jzs)
 - [Post on Ford Transit USA Forum with more info](https://www.fordtransitusaforum.com/threads/home-assistant-for-van-automation.90215/post-1245570)
 - [AHT21 housing on Thingiverse](https://www.thingiverse.com/thing:5200358)
 
