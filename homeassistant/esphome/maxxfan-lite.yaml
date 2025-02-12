@@ -1,0 +1,257 @@
+esphome:
+  name: maxxfan
+  friendly_name: MaxxFan
+  includes:
+    - custom_outputs.h
+  on_boot:
+    # Lowest priority; wait until everything else is done
+    priority: -100
+    # Need to set initial values during boot sequence
+    # Two situations:   1: ESP32 was restarted without disconnecting MaxxFan power
+    #                   2: Both ESP32 and MaxxFan were re-powered
+    # 1. For ESP32 restart, need to use restore values saved to flash by ESP32
+    # 2. For full re-power, the MaxxFan default values are:
+    #    power = off; speed = 4; direction = exhaust (reverse); cover = closed
+    then:
+      lambda: |-
+        ESP_LOGD("boot", "Executing on_boot logic");
+        if (!id(is_restart)) {
+          // Not a restart condition, therefore likely a full re-power.
+          // Apply default MaxxFan settings otherwise it will just
+          // use settings which should have been saved by ESP32.
+          ESP_LOGD("boot", "Setting globals to re-power values");
+          id(actual_fan_power) = 0;     //Off
+          id(actual_fan_speed) = 4;     //40%
+          id(actual_fan_direction) = 1; //Exhaust
+          id(actual_fan_cover) = 0;     //Closed
+        }
+        ESP_LOGD("boot", "Updating entities with values from globals");
+        // Usually you can set power and speed in same call, but when you do it
+        // sets power first, which will immediately turn on with speed of 10
+        // which is the default setting when speed is 0/unknown. So make two calls
+        // and set the speed first.
+        auto call = id(MaxxFan).make_call();
+        call.set_speed(id(actual_fan_speed));
+        call.perform();
+        call.set_state(id(actual_fan_power));
+        call.perform();
+        id(maxxfan_direction).publish_state(id(actual_fan_direction));
+        id(maxxfan_cover).publish_state(id(actual_fan_cover));
+        ESP_LOGD("boot", "Power set to: %d", id(actual_fan_power));
+        ESP_LOGD("boot", "Speed set to: %d", id(actual_fan_speed));
+        ESP_LOGD("boot", "Direction set to: %d", id(actual_fan_direction));
+        ESP_LOGD("boot", "Cover set to: %d", id(actual_fan_cover));
+        // Reset flags for next boot
+        id(is_restart) = false;
+        id(is_boot_finished) = true;
+  on_shutdown:
+    # Clicking Restart button in UI will trigger controlled shutdown/restart vs. just
+    # disconnecting power from both the fan and ESP32, which will not trigger on_shutdown.
+    priority: 600
+    # Set indicator
+    then:
+      - lambda: |-
+          id(is_restart) = true;
+          ESP_LOGD("shutdown", "Restart set to: %d", id(is_restart));
+
+# This sample config was tested with an Olimex-POE-ISO board
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "YOUR_ENCRYPTION_KEY_HERE" 
+
+ota:
+  - platform: esphome
+    password: "YOUR_OTA_PASSWORD_HERE"
+
+# Ethernet configuration for Olimex-POE-ISO board
+ethernet:
+  type: LAN8720
+  mdc_pin: GPIO23
+  mdio_pin: GPIO18
+  clk_mode: GPIO17_OUT
+  phy_addr: 0
+  power_pin: GPIO12
+  manual_ip:
+    static_ip: 192.168.0.101
+    gateway: 192.168.0.1
+    subnet: 255.255.255.0
+
+# If you use a WiFi connection
+# wifi:
+#     ssid: !secret wifi_ssid
+#     password: !secret wifi_password
+
+#     # Enable fallback hotspot (captive portal) in case wifi connection fails
+#     ap:
+#         ssid: "Maxxfan Fallback Hotspot"
+#         password: "YOUR_AP_PASSWORD_HERE"
+# captive_portal:
+
+i2c:
+  # Standard i2c pins for ESP32
+  sda: 21
+  scl: 22
+  scan: true
+  id: bus_a
+
+globals:
+  # Need this to know if on_boot is a restart or re-power
+  - id: is_restart
+    type: bool
+    initial_value: "0"
+    restore_value: true
+  # Need this to know if boot finished; don't execute output actions
+  # unless boot has finished to prevent UI overriding actual values
+  - id: is_boot_finished
+    type: bool
+    initial_value: "0"
+    restore_value: false
+  # Used to keep track of actual settings in fan itself.  UI controls
+  # need to be synchronized to match these actual settings. Required
+  # because speed adjustment requires incremental button presses, and
+  # MaxxFan automatically lowers the fan cover whenever power is turned on.
+  - id: actual_fan_speed
+    type: int
+    initial_value: "4"
+    restore_value: true
+  - id: actual_fan_power
+    type: bool
+    initial_value: "0"
+    restore_value: true
+  - id: actual_fan_direction
+    type: bool
+    initial_value: "1"
+    restore_value: true
+  - id: actual_fan_cover
+    type: bool
+    initial_value: "0"
+    restore_value: true
+
+fan:
+  # Main fan entity for power and speed
+  - platform: speed
+    name: Fan
+    id: MaxxFan
+    output: output_speed
+    # Restore settings handled by on_boot
+    restore_mode: NO_RESTORE
+    # 0 is not real MaxxFan speed, but HA uses it
+    # to reflect off status; can't avoid unless we refactor
+    # and use numeric input/slider control to keep track
+    # of speed.
+    speed_count: 10
+    on_turn_on:
+      output.turn_on: output_power
+    on_turn_off:
+      output.turn_off: output_power
+
+output:
+  # Custom output for when power changed
+  - platform: custom
+    type: binary
+    lambda: |-
+      auto my_power_output = new PowerOutput();
+      App.register_component(my_power_output);
+      return {my_power_output};
+    outputs:
+      id: output_power
+  # Custom output for when speed changed
+  - platform: custom
+    type: float
+    lambda: |-
+      auto my_speed_output = new SpeedOutput();
+      App.register_component(my_speed_output);
+      return {my_speed_output};
+    outputs:
+      id: output_speed
+  # Custom output for when direction changed
+  - platform: custom
+    type: binary
+    lambda: |-
+      auto my_direction_output = new DirectionOutput();
+      App.register_component(my_direction_output);
+      return {my_direction_output};
+    outputs:
+      id: output_direction
+  # Custom output for when cover changed
+  - platform: custom
+    type: binary
+    lambda: |-
+      auto my_cover_output = new CoverOutput();
+      App.register_component(my_cover_output);
+      return {my_cover_output};
+    outputs:
+      id: output_cover
+switch:
+  # Switch for controlling cover open/close.
+  - platform: output
+    name: Cover
+    output: output_cover
+    id: maxxfan_cover
+  # Switch for controlling fan direction.
+  - platform: output
+    name: Direction
+    output: output_direction
+    id: maxxfan_direction
+
+binary_sensor:
+  # Reports if ESP32 is connected to HA via WiFi or not
+  - platform: status
+    name: Status
+
+time:
+  # Get time from HA and update timestamp after time sync
+  - platform: homeassistant
+    id: current_time
+    on_time_sync:
+      - component.update: timestamp
+
+sensor:
+  # This reports how long ESP32 has been powered up. Does not have a name
+  # so it will not show up in HA or get written to HA DB.
+  - platform: uptime
+    id: uptime_sec
+  # This gets updated once whenever HA syncs with ESP32.  This prevents
+  # DB bloat within HA. It uses the uptime sensor to calculate when
+  # ESP32 first powered up, and then reports this state to HA.
+  - platform: template
+    id: timestamp
+    name: timestamp
+    device_class: timestamp
+    entity_category: diagnostic
+    accuracy_decimals: 0
+    update_interval: never
+    lambda: |-
+      static float timestamp = (
+        id(current_time).utcnow().timestamp - id(uptime_sec).state
+      );
+      return timestamp;
+  # ADC converter to monitor ESP32 board voltage
+  - platform: adc
+    pin: 36
+    name: "Board voltage"
+    device_class: voltage
+    update_interval: 1s
+    attenuation: auto
+    accuracy_decimals: 1
+    filters:
+      # 75k ohm + 22k ohm voltage divider shifts 14.55V to 3.3V
+      - multiply: 4.409
+      # Small calibration based on actual observation
+      - offset: -0.06
+      # Prevent changes < +/- 0.1V from reporting
+      - delta: 0.1
+
+button:
+  # Restart the ESP32 module
+  - platform: restart
+    name: Restart
