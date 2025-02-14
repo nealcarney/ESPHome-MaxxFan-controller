@@ -124,6 +124,27 @@ globals:
     type: bool
     initial_value: '0'
     restore_value: true
+  # GPIO pin configurations
+  - id: gpio_down_pin
+    type: int
+    initial_value: "26"
+    restore_value: no
+  - id: gpio_up_pin
+    type: int
+    initial_value: "23"
+    restore_value: no
+  - id: gpio_power_pin
+    type: int
+    initial_value: "33"
+    restore_value: no
+  - id: gpio_direction_pin
+    type: int
+    initial_value: "27"
+    restore_value: no
+  - id: gpio_auto_pin
+    type: int
+    initial_value: "25"
+    restore_value: no
 
 fan:
   # Main fan entity for power and speed
