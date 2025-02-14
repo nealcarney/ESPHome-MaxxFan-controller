@@ -44,7 +44,8 @@ The schematics and PCB are a prototype!!!  Please do not try to use as-is.  Late
     - `custom_outputs.h` - Custom C++ code for MaxxFan control
   - `/www/` - Web assets for Lovelace UI customization
 - `/MaxxFan-Controller-Lite/` - Contains the MaxxFan-Controller-Lite hardware files designed in Fusion 360
-- PCB design files are hosted separately on [OSH Lab](https://oshwlab.com/ncarney/maxxfan-controller)
+  - You can order the [MaxxFan only boards on PCBWay](https://www.pcbway.com/project/shareproject/W829927AS1Y4_WALTERS_schematic_v24_2025_01_10_53f183b7.html)
+- And the PCB design files for the MaxxFan + Houghton AC are hosted separately on [OSH Lab](https://oshwlab.com/ncarney/maxxfan-controller)
 
 ## Notes
 
