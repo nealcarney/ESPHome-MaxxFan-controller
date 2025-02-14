@@ -43,6 +43,7 @@ The schematics and PCB are a prototype!!!  Please do not try to use as-is.  Late
     - `maxxfan-lite.yaml` - Simplified configuration for MaxxFan only
     - `custom_outputs.h` - Custom C++ code for MaxxFan control
   - `/www/` - Web assets for Lovelace UI customization
+- `/MaxxFan-Controller-Lite/` - Contains the MaxxFan-Controller-Lite hardware files designed in Fusion 360
 - PCB design files are hosted separately on [OSH Lab](https://oshwlab.com/ncarney/maxxfan-controller)
 
 ## Notes
