@@ -41,11 +41,24 @@ The schematics and PCB are a prototype!!!  Please do not try to use as-is.  Late
   - `/esphome/` - ESPHome configuration and custom components
     - `maxxfan.yaml` - Full configuration with MaxxFan and AC control
     - `maxxfan-lite.yaml` - Simplified configuration for MaxxFan only
-    - `custom_outputs.h` - Custom C++ code for MaxxFan control
+    - `custom_outputs.h` - Historical C++ code for MaxxFan control (using deprecated custom components)
+    - `/components/maxxfan/` - External component implementation for ESPHome 2025.3.3+ compatibility
+      - `__init__.py` - Python module for component registration
+      - `output.py` - Output component registration
+      - `maxxfan_output.h` - C++ header with output implementations
+      - `maxxfan_output.cpp` - C++ implementation file
   - `/www/` - Web assets for Lovelace UI customization
 - `/MaxxFan-Controller-Lite/` - Contains the MaxxFan-Controller-Lite hardware files designed in Fusion 360
   - You can order the [MaxxFan only boards on PCBWay](https://www.pcbway.com/project/shareproject/W829927AS1Y4_WALTERS_schematic_v24_2025_01_10_53f183b7.html)
 - And the PCB design files for the MaxxFan + Houghton AC are hosted separately on [OSH Lab](https://oshwlab.com/ncarney/maxxfan-controller)
+
+## ESPHome Compatibility Notes
+
+- ESPHome 2025.3.3 removed support for the "custom" component type
+- This repository now uses a proper external component implementation in `/homeassistant/esphome/components/maxxfan/`
+- The original `custom_outputs.h` file is preserved for historical reference
+- Both the simplified MaxxFan-only configuration (`maxxfan-lite.yaml`) and the full configuration with AC control use this new external component structure
+- **Important**: You need to update the GPIO pin configurations in your YAML file to match the pins you're using on your ESP32. Look for the `globals` section with variables like `gpio_up_pin`, `gpio_down_pin`, etc. and set them to your specific pin numbers.
 
 ## Notes
 
